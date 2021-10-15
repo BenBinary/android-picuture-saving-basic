@@ -1,15 +1,18 @@
 package com.example.android_picuture_saving_basic;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 0;
     public Button btnPhoto;
     public Button btnSave;
+    public int REQUEST_CODE = 100;
 
     public ImageView imagePreview;
 
@@ -68,10 +72,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                try {
-                    saveToGallery();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        saveToGallery();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    askPermissions();
                 }
 
                 // createImageFile();
@@ -86,6 +94,32 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void askPermissions() {
+
+        ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_CODE) {
+
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    saveToGallery();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Toast.makeText(getApplicationContext(), "Please provide the necessary Permission", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void takePicture() {
@@ -118,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
 
         FileOutputStream fos = null;
         File file = Environment.getExternalStorageDirectory();
-        File dir = new File(file.getAbsolutePath() + "/MyPics");
+        //  File dir = new File(file.getAbsolutePath() + "/MyPics");
+        File dir = new File(Environment.getDataDirectory(), "Save Image");
 
         if (dir.exists() == false) {
             dir.mkdir();
@@ -127,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         String filename = String.format("%d.png", System.currentTimeMillis());
         File outFile = new File(dir, filename);
         outFile.mkdirs();
-        outFile.createNewFile();
+        // outFile.createNewFile();
 
         try {
 
