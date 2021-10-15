@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public Button btnPhoto;
     public Button btnSave;
     public int REQUEST_CODE = 100;
+    String currentPhotoPath;
 
     public ImageView imagePreview;
 
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
                     saveToGallery();
+                    galleryAddPic();
+                    Toast.makeText(getApplicationContext(), "Picture successfully stored.", Toast.LENGTH_SHORT).show();;
+
 
                 } else {
                     askPermissions();
@@ -152,9 +156,13 @@ public class MainActivity extends AppCompatActivity {
         // File dir = null;
         // if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
         // File dir = new File(Environment.DIRECTORY_DCIM, "SaveImage");
-        File dir = new File(String.valueOf(getApplicationContext().getFilesDir()));
+        // File dir = new File(String.valueOf(getApplicationContext().getFilesDir()));
+        //File dir = new File(Environment.getExternalStorageDirectory(Environment.DIRECTORY_DCIM).toString() + "/img");
+        File dir = new File(String.valueOf(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
 
         File file = new File(dir, System.currentTimeMillis()+ ".jpg");
+
+        currentPhotoPath = file.getAbsoluteFile().toString();
 
         // String filename = String.format("%d.jpg", System.currentTimeMillis());
         // File outFile = new File(dir, filename);
@@ -183,7 +191,14 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
 
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(currentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
 
 
     }
