@@ -148,8 +148,11 @@ public class MainActivity extends AppCompatActivity {
 
         FileOutputStream fos = null;
         // File file = Environment.getExternalStorageDirectory();
-        //  File dir = new File(file.getAbsolutePath() + "/MyPics");
-        File dir = new File(Environment.getExternalStorageDirectory(), "SaveImage");
+        // File dir = new File(file.getAbsolutePath() + "/MyPics");
+        // File dir = null;
+        // if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        // File dir = new File(Environment.DIRECTORY_DCIM, "SaveImage");
+        File dir = new File(String.valueOf(getApplicationContext().getFilesDir()));
 
         File file = new File(dir, System.currentTimeMillis()+ ".jpg");
 
@@ -158,13 +161,13 @@ public class MainActivity extends AppCompatActivity {
         // outFile.mkdirs();
         // outFile.createNewFile();
 
+        dir.mkdirs();
         try {
-            dir.mkdirs();
             fos = new FileOutputStream(file);
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
 
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 
