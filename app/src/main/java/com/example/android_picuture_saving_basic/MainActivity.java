@@ -73,11 +73,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                    try {
-                        saveToGallery();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+                    saveToGallery();
+
                 } else {
                     askPermissions();
                 }
@@ -108,11 +106,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE) {
 
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                try {
-                    saveToGallery();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+                saveToGallery();
+
             } else {
                 Toast.makeText(getApplicationContext(), "Please provide the necessary Permission", Toast.LENGTH_SHORT).show();
             }
@@ -140,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void saveToGallery() throws IOException {
+    private void saveToGallery() {
 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) imagePreview.getDrawable();
         Bitmap bitmap = bitmapDrawable.getBitmap();
@@ -151,36 +147,40 @@ public class MainActivity extends AppCompatActivity {
 
 
         FileOutputStream fos = null;
-        File file = Environment.getExternalStorageDirectory();
+        // File file = Environment.getExternalStorageDirectory();
         //  File dir = new File(file.getAbsolutePath() + "/MyPics");
-        File dir = new File(Environment.getDataDirectory(), "Save Image");
+        File dir = new File(Environment.getExternalStorageDirectory(), "SaveImage");
 
-        if (dir.exists() == false) {
-            dir.mkdir();
-        }
+        File file = new File(dir, System.currentTimeMillis()+ ".jpg");
 
-        String filename = String.format("%d.png", System.currentTimeMillis());
-        File outFile = new File(dir, filename);
-        outFile.mkdirs();
+        // String filename = String.format("%d.jpg", System.currentTimeMillis());
+        // File outFile = new File(dir, filename);
+        // outFile.mkdirs();
         // outFile.createNewFile();
 
         try {
-
-            fos = new FileOutputStream(outFile);
+            dir.mkdirs();
+            fos = new FileOutputStream(file);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 
         try {
             fos.flush();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            fos.close();
         }
+
+        try {
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 
 
     }
